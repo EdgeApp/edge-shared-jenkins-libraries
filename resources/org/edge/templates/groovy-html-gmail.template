@@ -1,0 +1,206 @@
+
+<body style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">
+  <!-- BUILD RESULT -->
+  <table class="section" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;width: 100%;border-style: dotted;border-color: black;border-radius: 2px;border-width: 1;">
+    <tr class="tr-title" style="background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? '#27AE60' : build.result.toString() == 'FAILURE' ? '#E74C3C' : '#f4e242' %>">
+      <td class="td-title-main" colspan="2" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 200%;color: white;padding-left: 5px;font-weight: bold;">
+        BUILD ${build.result ?: 'COMPLETED'}
+      </td>
+    </tr>
+    <tr>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">URL:</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;"><a href="${rooturl}${build.url}">${rooturl}${build.url}</a></td>
+    </tr>
+    <tr>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">Project:</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${project.name}</td>
+    </tr>
+    <tr>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">Version:</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${build.description}</td>
+    </tr>
+    <tr>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">Date:</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${it.timestampString}</td>
+    </tr>
+    <tr>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">Duration:</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${build.durationString}</td>
+    </tr>
+    <tr>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">Cause:</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;"><% build.causes.each() { cause -> %> ${cause.shortDescription} <%  } %></td>
+    </tr>
+  </table>
+  <br>
+
+  <!-- CHANGE SET -->
+  <%
+  def changeSets = build.changeSets
+  if(changeSets != null) {
+    def hadChanges = false %>
+  <table class="section" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;width: 100%;border-style: dotted;border-color: black;border-radius: 2px;border-width: 1;">
+    <tr class="tr-title" style="background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? '#27AE60' : build.result.toString() == 'FAILURE' ? '#E74C3C' : '#f4e242' %>">
+      <td class="td-title" colspan="2" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: white;font-weight: bold;padding-left: 5px;text-transform: uppercase;">CHANGES</td>
+    </tr>
+    <% changeSets.each() {
+      cs_list -> cs_list.each() {
+        cs -> hadChanges = true %>
+    <tr>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">
+        Revision
+        <%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : cs.metaClass.hasProperty('changeNumber') ? cs.changeNumber : "" %>
+        by <b><%= cs.author %></b>
+      </td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${cs.msgAnnotated}</td>
+    </tr>
+        <% cs.affectedFiles.each() {
+          p -> %>
+    <tr>
+      <td class="filesChanged" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;width: 10%;padding-left: 10px;">${p.editType.name}</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${p.path}</td>
+    </tr>
+        <% }
+      }
+    }
+    if ( !hadChanges ) { %>
+    <tr>
+      <td colspan="2" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">No Changes</td>
+    </tr>
+    <% } %>
+  </table>
+  <br>
+  <% } %>
+
+<!-- ARTIFACTS -->
+  <%
+  def artifacts = build.artifacts
+  if ( artifacts != null && artifacts.size() > 0 ) { %>
+  <table class="section" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;width: 100%;border-style: dotted;border-color: black;border-radius: 2px;border-width: 1;">
+    <tr class="tr-title" style="background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? '#27AE60' : build.result.toString() == 'FAILURE' ? '#E74C3C' : '#f4e242' %>">
+      <td class="td-title" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: white;font-weight: bold;padding-left: 5px;text-transform: uppercase;">BUILD ARTIFACTS</td>
+    </tr>
+    <% artifacts.each() {
+      f -> %>
+      <tr>
+        <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">
+          <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
+      </td>
+    </tr>
+    <% } %>
+  </table>
+  <br>
+  <% } %>
+
+<!-- MAVEN ARTIFACTS -->
+  <%
+  try {
+    def mbuilds = build.moduleBuilds
+    if ( mbuilds != null ) { %>
+  <table class="section" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;width: 100%;border-style: dotted;border-color: black;border-radius: 2px;border-width: 1;">
+    <tr class="tr-title" style="background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? '#27AE60' : build.result.toString() == 'FAILURE' ? '#E74C3C' : '#f4e242' %>">
+      <td class="td-title" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: white;font-weight: bold;padding-left: 5px;text-transform: uppercase;">BUILD ARTIFACTS</td>
+    </tr>
+      <%
+      try {
+        mbuilds.each() {
+          m -> %>
+    <tr>
+      <td class="td-header-maven-module" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: black;font-weight: bold;">${m.key.displayName}</td>
+    </tr>
+          <%
+          m.value.each() {
+            mvnbld -> def artifactz = mvnbld.artifacts
+            if ( artifactz != null && artifactz.size() > 0) { %>
+    <tr>
+      <td class="td-maven-artifact" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;padding-left: 5px;">
+              <% artifactz.each() {
+                f -> %>
+        <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a><br>
+              <% } %>
+      </td>
+    </tr>
+            <% }
+          }
+        }
+      } catch(e) {
+        // we don't do anything
+      } %>
+  </table>
+  <br>
+    <% }
+  } catch(e) {
+    // we don't do anything
+  } %>
+
+<!-- JUnit TEMPLATE -->
+
+  <%
+  def junitResultList = it.JUnitTestResult
+  try {
+    def cucumberTestResultAction = it.getAction("org.jenkinsci.plugins.cucumber.jsontestsupport.CucumberTestResultAction")
+    junitResultList.add( cucumberTestResultAction.getResult() )
+  } catch(e) {
+    //cucumberTestResultAction not exist in this build
+  }
+  if ( junitResultList.size() > 0 ) { %>
+  <table class="section" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;width: 100%;border-style: dotted;border-color: black;border-radius: 2px;border-width: 1;">
+    <tr class="tr-title" style="background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? '#27AE60' : build.result.toString() == 'FAILURE' ? '#E74C3C' : '#f4e242' %>">
+      <td class="td-title" colspan="5" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: white;font-weight: bold;padding-left: 5px;text-transform: uppercase;">${junitResultList.first().displayName}</td>
+    </tr>
+    <tr>
+        <td class="td-title-tests" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: black;font-weight: bold;">Name</td>
+        <td class="td-title-tests" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: black;font-weight: bold;">Failed</td>
+        <td class="td-title-tests" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: black;font-weight: bold;">Passed</td>
+        <td class="td-title-tests" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: black;font-weight: bold;">Skipped</td>
+        <td class="td-title-tests" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: black;font-weight: bold;">Total</td>
+      </tr>
+    <% junitResultList.each {
+      junitResult -> junitResult.getChildren().each {
+        packageResult -> %>
+    <tr>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${packageResult.getName()}</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${packageResult.getFailCount()}</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${packageResult.getPassCount()}</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${packageResult.getSkipCount()}</td>
+      <td style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;">${packageResult.getPassCount() + packageResult.getFailCount() + packageResult.getSkipCount()}</td>
+    </tr>
+    <% packageResult.getPassedTests().findAll({it.getStatus().toString() == "FIXED";}).each{
+        test -> %>
+            <tr>
+              <td class="test test-fixed" colspan="5" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: #27AE60;padding-left: 20px;">
+                ${test.getFullName()} ${test.getStatus()}
+              </td>
+            </tr>
+        <% } %>
+        <% packageResult.getFailedTests().sort({a,b -> a.getAge() <=> b.getAge()}).each{
+          failed_test -> %>
+    <tr>
+      <td class="test test-failed" colspan="5" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: #E74C3C;padding-left: 20px;">
+        ${failed_test.getFullName()} (Age: ${failed_test.getAge()})
+      </td>
+    </tr>
+        <% }
+      }
+    } %>
+  </table>
+  <br>
+  <% } %>
+
+<!-- CONSOLE OUTPUT -->
+  <%
+  if ( build.result == hudson.model.Result.FAILURE ) { %>
+  <table class="section" cellpadding="0" cellspacing="0" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 14px;color: black;width: 100%;border-style: dotted;border-color: black;border-radius: 2px;border-width: 1;">
+    <tr class="tr-title" style="background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? '#27AE60' : build.result.toString() == 'FAILURE' ? '#E74C3C' : '#f4e242' %>">
+      <td class="td-title" style="font-family: Calibri, Verdana, Helvetica, sans serif;font-size: 120%;color: white;font-weight: bold;padding-left: 5px;text-transform: uppercase;">CONSOLE OUTPUT</td>
+    </tr>
+    <% 	build.getLog(100).each() {
+      line -> %>
+	  <tr>
+      <td class="console" style="font-family: Courier New;font-size: 14px;color: black;">${org.apache.commons.lang.StringEscapeUtils.escapeHtml(line)}</td>
+    </tr>
+    <% } %>
+  </table>
+  <br>
+  <% } %>
+</body>
